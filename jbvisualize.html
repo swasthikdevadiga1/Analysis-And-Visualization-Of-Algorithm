@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Assignment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+        }
+        canvas{
+            background-color: grey;
+            margin-top: 40px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            text-align: center;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        label {
+            font-weight: bold;
+        }
+        input[type="number"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+        button {
+		margin-top:20px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #4562a0;
+        }
+        table {
+            border-collapse: collapse;
+            margin: 20px auto;
+            border: 1px solid #ddd;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Job Assignment</h1>
+        <div>
+            <label for="jobs">Number of Jobs:</label>
+            <input type="number" id="jobs">
+        </div>
+        <div>
+            <label for="persons">Number of Persons:</label>
+            <input type="number" id="persons">
+        </div>
+        <button onclick="generateMatrix()">Generate Matrix</button>
+        <div id="matrixContainer"></div>
+        <button onclick="findOptimalAssignment()">Find Optimal Assignment</button>
+        <div id="result"></div>
+        <canvas id="humanCanvas" width="600" height="600"></canvas>
+    </div>
+    <script>
+        function generateMatrix() {
+            const jobs = parseInt(document.getElementById('jobs').value);
+            const persons = parseInt(document.getElementById('persons').value);
+
+            let matrixHtml = '<table>';
+            for (let i = 0; i < jobs; i++) {
+                matrixHtml += '<tr>';
+                for (let j = 0; j < persons; j++) {
+                    matrixHtml += `<td><input type="number" id="cost_${i}_${j}" placeholder="cost ${i} to ${j}"/></td>`;
+                }
+                matrixHtml += '</tr>';
+            }
+            matrixHtml += '</table>';
+
+            document.getElementById('matrixContainer').innerHTML = matrixHtml;
+        }
+
+        function findOptimalAssignment() {
+            const jobs = parseInt(document.getElementById('jobs').value);
+            const persons = parseInt(document.getElementById('persons').value);
+
+            let costs = [];
+            for (let i = 0; i < jobs; i++) {
+                costs[i] = [];
+                for (let j = 0; j < persons; j++) {
+                    costs[i][j] = parseInt(document.getElementById(`cost_${i}_${j}`).value);
+                }
+            }
+
+            const assignment = hungarian(costs);
+
+            // Display result
+            const resultElement = document.getElementById('result');
+            resultElement.innerHTML = ''; // Clear previous result
+            resultElement.innerHTML += 'Optimal Assignment:<br>';
+            let totalCost = 0;
+            for (let i = 0; i < jobs; i++) {
+                const personIndex = assignment[i];
+                if (personIndex !== undefined) {
+                    const cost = costs[i][personIndex];
+                    resultElement.innerHTML += `Job ${i+1} assigned to Person ${personIndex+1} with cost ${cost}<br>`;
+                    totalCost += cost;
+                } else {
+                    resultElement.innerHTML += `Job ${i+1} not assigned<br>`;
+                }
+               
+            }
+            resultElement.innerHTML += `<strong>Total Cost: ${totalCost}</strong>`;
+            var canvas=document.getElementById('humanCanvas');
+            var ctx=canvas.getContext('2d');
+            var colors=['pink','blue','red','yellow'];
+            var startY=50;
+            var spacingY=150;
+            for (let i = 0; i < jobs; i++) 
+            {
+                ctx.beginPath();
+                ctx.arc(50,startY,20,0,Math.PI*2);
+                ctx.fillStyle=colors[i];
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(50,startY+20);
+                ctx.lineTo(50,startY+80);
+                ctx.strokeStyle=colors[i];
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(50,startY+20);
+                ctx.lineTo(20,startY+50);
+                ctx.moveTo(50,startY+20);
+                ctx.lineTo(70,startY+50);
+                ctx.strokeStyle=colors[i];
+                ctx.stroke();
+
+                ctx.font="20px Arial";
+                ctx.fillStyle="black";
+                ctx.textAlign="center";
+                const personIndex = assignment[i];
+                var s='Job'+(i+1) +' assigned to Person' + (personIndex+1);
+                ctx.fillText(s,300,startY);
+
+                ctx.beginPath();
+                ctx.moveTo(50,startY+80);
+                ctx.lineTo(20,startY+120);
+                ctx.moveTo(50,startY+80);
+                ctx.lineTo(70,startY+120);
+                ctx.strokeStyle=colors[i];
+                ctx.stroke();
+
+                startY+=spacingY;
+
+            }
+        }
+
+        // Hungarian Algorithm implementation
+        function hungarian(costMatrix) {
+            const rows = costMatrix.length;
+            const cols = costMatrix[0].length;
+
+            // Make a copy of the cost matrix
+            const C = JSON.parse(JSON.stringify(costMatrix));
+
+            // Step 1: Subtract the smallest cost from each row
+            for (let i = 0; i < rows; i++) {
+                const minVal = Math.min(...C[i]);
+                for (let j = 0; j < cols; j++) {
+                    C[i][j] -= minVal;
+                }
+            }
+
+            // Step 2: Subtract the smallest cost from each column
+            for (let j = 0; j < cols; j++) {
+                const minVal = Math.min(...C.map(row => row[j]));
+                for (let i = 0; i < rows; i++) {
+                    C[i][j] -= minVal;
+                }
+            }
+
+            // Step 3: Cover all zeros in the matrix with the minimum number of lines
+            const coveredRows = new Array(rows).fill(false);
+            const coveredCols = new Array(cols).fill(false);
+            const starMatrix = new Array(rows).fill(0).map(() => new Array(cols).fill(0));
+
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    if (C[i][j] === 0 && !coveredRows[i] && !coveredCols[j]) {
+                        starMatrix[i][j] = 1;
+                        coveredRows[i] = true;
+                        coveredCols[j] = true;
+                    }
+                }
+            }
+
+            const rowCoveredCount = coveredRows.reduce((acc, val) => acc + val, 0);
+            if (rowCoveredCount === rows) {
+                return findAssignment(starMatrix);
+            } else {
+                return [];
+            }
+        }
+
+        function findAssignment(starMatrix) {
+            const assignment = [];
+
+            for (let i = 0; i < starMatrix.length; i++) {
+                for (let j = 0; j < starMatrix[i].length; j++) {
+                    if (starMatrix[i][j] === 1) {
+                        assignment[i] = j;
+                        break;
+                    }
+                }
+            }
+
+            return assignment;
+        }
+    </script>
+</body>
+</html>

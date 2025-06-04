@@ -1,0 +1,192 @@
+/* Importing Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+header {
+    background-color: #4CAF50;
+    color: white;
+    padding: 20px 0;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    animation: fadeInDown 1s ease-out;
+}
+
+main {
+    padding: 20px;
+    max-width: 800px;
+    margin: 20px auto;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    animation: fadeInUp 1s ease-out;
+}
+
+.topic-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.topic-list li {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    margin: 10px 0;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 8px;
+    transition: box-shadow 0.3s, transform 0.3s, background-color 0.3s;
+    animation: slideInUp 0.5s ease-out forwards;
+    opacity: 0;
+}
+
+.topic-list li:nth-child(1) { animation-delay: 0.1s; }
+.topic-list li:nth-child(2) { animation-delay: 0.2s; }
+.topic-list li:nth-child(3) { animation-delay: 0.3s; }
+.topic-list li:nth-child(4) { animation-delay: 0.4s; }
+.topic-list li:nth-child(5) { animation-delay: 0.5s; }
+
+.topic-list li:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-5px);
+    background-color: #f0f8ff;
+}
+
+.topic-list span {
+    font-size: 1.2em;
+    color: #555;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    border-radius: 5px;
+    font-size: 1em;
+    font-weight: 500;
+}
+
+button:hover {
+    background-color: #45a049;
+    transform: scale(1.05);
+}
+
+footer {
+
+background-color: #4CAF50;
+    color: red;
+    text-align: center;
+    padding: 20px 0;
+    position: relative; /* Changed from absolute to relative to ensure footer stays at the bottom of content */
+    width: 100%;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+    animation: fadeInUp 1s ease-out;
+}
+
+footer p {
+    margin: 0;
+    font-size: 1.2em;
+    font-weight: 500;
+}
+
+footer ul {
+    list-style: none;
+    padding: 0;
+    margin: 5px 0 0;
+    display: flex;
+    justify-content: center;
+}
+
+footer ul li {
+    margin: 0 10px;
+    font-size: 1em;
+    font-weight: 600;
+    transition: color 0.3s, transform 0.3s;
+}
+
+footer ul li:hover {
+    color: #ddd;
+    transform: scale(1.05);
+}
+
+footer ul li:nth-child(1) {
+    color: white;
+}
+
+footer ul li:nth-child(2) {
+    color: white;
+}
+
+footer ul li:nth-child(3) {
+    color: white;
+}
+
+@media (max-width: 600px) {
+    .topic-list li {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    button {
+        margin-top: 10px;
+        width: 100%;
+    }
+
+    footer ul {
+        flex-direction: column;
+    }
+
+    footer ul li {
+        display: block;
+        margin-bottom: 5px;
+    }
+}
+
+/* Animations */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+h1{
+color:white;
+font-weight:600;
+}

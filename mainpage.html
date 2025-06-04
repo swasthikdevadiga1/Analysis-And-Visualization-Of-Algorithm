@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Topics Page</title>
+    <link rel="stylesheet" href="mainstyles.css">
+</head>
+<body>
+    <header>
+        <h1>Analysis and Visualization of Algorithms</h1>
+    </header>
+    <main>
+        <ul class="topic-list">
+            <li>
+                <span>KNAPSACK</span>
+                <button onclick="openPage('knapsack.html')">Go</button>
+            </li>
+            <li>
+                <span>TRAVELLING SALESMAN</span>
+                <button onclick="openPage('try2.html')">Go</button>
+            </li>
+            <li>
+                <span>JOB ASSIGNMENT</span>
+                <button onclick="openPage('jbvisualize.html')">Go</button>
+            </li>
+            <li>
+                <span>DIJKSTRA'S</span>
+                <button onclick="openPage('dij.html')">Go</button>
+            </li>
+            <li>
+                <span>TOWER OF HANOI</span>
+                <button onclick="openPage('default.html')">Go</button>
+            </li>
+        </ul>
+    </main>
+    <footer>
+        <p>Group Members:</p>
+        <ul>
+            <li>SWASTHIK DEVADIGA</li>
+            <li>ABHISHEK S KOTARY</li>
+            <li>CHETHAN KUMAR</li>
+        </ul>
+    </footer>
+    <script>
+        function openPage(url) {
+            window.location.href = url;
+        }
+    </script>
+</body>
+</html>

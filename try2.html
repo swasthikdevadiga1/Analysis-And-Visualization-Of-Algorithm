@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traveling Salesman Problem</title>
+    <style>
+      body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #f0f0f0;
+}
+
+.container {
+    margin: 50px auto;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    width: 70%;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    margin-bottom: 20px;
+}
+
+label {
+    font-weight: bold;
+}
+
+input[type="number"] {
+    width: 150px;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+button {
+    padding: 12px 24px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#output {
+    margin-top: 30px;
+    text-align: left;
+}
+
+p {
+    margin: 10px 0;
+}
+
+.canva {
+    margin-top: 50px;
+    display: flex;
+    justify-content: space-around;
+    background-color: #f0f0f0;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+canvas {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Traveling Salesman Problem Solver</h1>
+        <div>
+            <label for="numCities">Number of Cities:</label>
+            <input type="number" id="numCities" min="2" required>
+        </div>
+        <div id="costMatrixDiv" style="display: none;">
+            <h3>Enter Cost Matrix:</h3>
+        </div>
+        <button id="submitBtn">Submit</button>
+        <div id="output" style="display: none;">
+            <h2>Result:</h2>
+            <p id="minCost"></p>
+            <p id="optimalPath"></p>
+        </div>
+    </div>
+    <div class="canva">
+        <canvas id="canvas" height="300" width="300"></canvas>
+        <canvas id="outputCanvas" height="300" width="300"></canvas>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const numCitiesInput = document.getElementById('numCities');
+            const costMatrixDiv = document.getElementById('costMatrixDiv');
+            const submitBtn = document.getElementById('submitBtn');
+            const outputDiv = document.getElementById('output');
+            const minCostOutput = document.getElementById('minCost');
+            const optimalPathOutput = document.getElementById('optimalPath');
+
+            let numCities;
+            let costMatrix = [];
+
+            numCitiesInput.addEventListener('input', function () {
+                numCities = parseInt(numCitiesInput.value);
+                generateCostMatrixInput();
+            });
+
+            function generateCostMatrixInput() {
+                costMatrixDiv.innerHTML = '<h3>Enter Cost Matrix:</h3>';
+                for (let i = 0; i < numCities; i++) {
+                    for (let j = 0; j < numCities; j++) {
+                        if (i !== j) {
+                            costMatrixDiv.innerHTML += `
+                        <input type="number" id="cost_${i}_${j}" placeholder="Cost ${i + 1} to ${j + 1}" required>
+                    `;
+                        }
+                    }
+                }
+                costMatrixDiv.style.display = 'block';
+            }
+
+            submitBtn.addEventListener('click', function () {
+                costMatrix = [];
+                for (let i = 0; i < numCities; i++) {
+                    costMatrix.push([]);
+                    for (let j = 0; j < numCities; j++) {
+                        if (i !== j) {
+                            const costInput = document.getElementById(`cost_${i}_${j}`);
+                            costMatrix[i][j] = parseInt(costInput.value) || Infinity;
+                        } else {
+                            costMatrix[i][j] = 0;
+                        }
+                    }
+                }
+                const sourceCity = 0; // Assuming the source city is always the first city
+                const result = tsp(costMatrix, numCities, sourceCity);
+                displayResult(result, costMatrix);
+            });
+
+            function displayResult(result, costMatrix) {
+                minCostOutput.textContent = `Minimum Cost: ${result.minCost}`;
+                optimalPathOutput.textContent = `Optimal Path: ${result.path.map(city => city + 1).join(' -> ')}`;
+                outputDiv.style.display = 'block';
+                animTSP(costMatrix, result);
+            }
+
+            function animTSP(costMatrix, result) {
+                const canvas = document.getElementById('canvas');
+                const ctx = canvas.getContext('2d');
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const cities = [];
+                for (let i = 0; i < numCities; i++) {
+                    cities.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        id: i
+                    });
+                }
+
+                cities.forEach(city => {
+                    ctx.beginPath();
+                    ctx.arc(city.x, city.y, 10, 0, Math.PI * 2);
+                    ctx.fillStyle = "blue";
+                    ctx.fill();
+                    ctx.fillText((city.id + 1).toString(), city.x - 5, city.y + 5); // Display city IDs
+                });
+
+                for (let i = 0; i < cities.length; i++) {
+                    for (let j = i + 1; j < cities.length; j++) {
+                        const distance1 = costMatrix[i][j];
+                        const distance2 = costMatrix[j][i];
+                        ctx.beginPath();
+                        ctx.moveTo(cities[i].x, cities[i].y);
+                        ctx.quadraticCurveTo((cities[i].x + cities[j].x) / 2, (cities[i].y + cities[j].y) / 2 - 20, cities[j].x, cities[j].y);
+                        ctx.strokeStyle = 'black';
+                        ctx.stroke();
+                        ctx.fillStyle = 'black';
+                        ctx.fillText(`${distance1} / ${distance2}`, (cities[i].x + cities[j].x) / 2, (cities[i].y + cities[j].y) / 2 - 20);
+                    }
+                }
+
+                // Draw output graph
+                const outputCanvas = document.getElementById('outputCanvas');
+                const outputCtx = outputCanvas.getContext('2d');
+
+                outputCtx.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
+
+                cities.forEach(city => {
+                    outputCtx.beginPath();
+                    outputCtx.arc(city.x, city.y, 10, 0, Math.PI * 2);
+                    outputCtx.fillStyle = "blue";
+                    outputCtx.fill();
+                    outputCtx.fillText((city.id + 1).toString(), city.x - 5, city.y + 5); // Display city IDs
+                });
+
+                const optimalPath = result.path;
+                outputCtx.beginPath();
+                outputCtx.moveTo(cities[optimalPath[0]].x, cities[optimalPath[0]].y);
+                for (let i = 1; i < optimalPath.length; i++) {
+                    const startCity = optimalPath[i - 1];
+                    const endCity = optimalPath[i];
+                    const distance = costMatrix[startCity][endCity];
+                    outputCtx.lineTo(cities[endCity].x, cities[endCity].y);
+                    outputCtx.strokeStyle = 'red';
+                    outputCtx.lineWidth = 2;
+                    outputCtx.stroke();
+                    outputCtx.fillStyle = 'black';
+                    outputCtx.fillText(`${distance}`, (cities[startCity].x + cities[endCity].x) / 2, (cities[startCity].y + cities[endCity].y) / 2 - 20);
+                }
+            }
+
+            function tsp(cost, n, source) {
+                const allVertices = (1 << n) - 1;
+                const dp = Array.from({ length: 1 << n }, () => Array(n + 1).fill(null));
+
+                function computeCost(mask, pos) {
+                    if (mask === allVertices) {
+                        return { minCost: cost[pos][source], path: [pos, source] };
+                    }
+                    if (dp[mask][pos] !== null) {
+                        return dp[mask][pos];
+                    }
+
+                    let minCost = Infinity;
+                    let minPath = [];
+
+                    for (let city = 0; city < n; city++) {
+                        if ((mask & (1 << city)) === 0) {
+                            const { minCost: newCost, path: newPath } = computeCost(mask | (1 << city), city);
+                            const totalCost = cost[pos][city] + newCost;
+                            if (totalCost < minCost) {
+                                minCost = totalCost;
+                                minPath = [pos, ...newPath];
+                            }
+                        }
+                    }
+
+                    dp[mask][pos] = { minCost, path: minPath };
+                    return dp[mask][pos];
+                }
+
+                return computeCost(1 << source, source);
+            }
+        });
+    </script>
+</body>
+</html>

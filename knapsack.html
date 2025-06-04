@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knapsack Problem Visualization</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+    body {
+        font-family: 'Roboto', sans-serif;
+        text-align: center;
+        background-color: #e8dcdc;
+	//background-color: black;
+        margin: 0;
+        padding: 0;
+    }
+
+    .heading {
+        margin-top: 30px;
+       // animation: marquee 15s linear infinite;
+        white-space: nowrap;
+    }
+
+    @keyframes marquee {
+        0% { transform: translateX(100%); }
+        100% { transform: translateX(-100%); }
+    }
+
+    h2 {
+	//color:black;
+       background: linear-gradient(to right, black, black);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        padding-bottom: 10px;
+    }
+
+    #container {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        padding: 20px;
+        gap: 20px;
+    }
+
+    #knapsack {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border: 2px solid black;
+        padding: 20px;
+	height:400px;
+        width: 100%;
+        max-width: 400px;
+        border-radius: 8px;
+        background-color: #b4eded;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    #knapsack:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    label {
+        color: black;
+        font-size: large;
+        margin: 10px 0;
+    }
+
+    button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.3s;
+    }
+
+    button:hover {
+        background-color: #00b30c;
+        transform: scale(1.05);
+    }
+
+    input[type="number"] {
+        width: 100px;
+        padding: 10px;
+        font-size: 16px;
+        border: 2px solid #1b7ce4;
+        border-radius: 4px;
+        margin-bottom: 10px;
+    }
+
+    #result {
+        margin-top: 20px;
+        text-align: left;
+    }
+
+    canvas {
+        border: 2px solid blue;
+        border-radius: 8px;
+        margin-top: 20px;
+        background-color: #fff;
+    }
+
+    @media (max-width: 768px) {
+        #container {
+            flex-direction: column;
+            align-items: center;
+        }
+    }
+</style>
+</head>
+<body>
+<h2 class="heading">Knapsack Problem Solving And Analysis</h2>
+<div id="container">
+  <div id="knapsack">
+    <h2>Knapsack Problem Solver</h2>
+    <div>
+      <label for="numItems">Number of Items:</label>
+      <input type="number" id="numItems">
+    </div>
+    <div id="items"></div>
+    <div>
+      <label for="capacity">Knapsack Capacity:</label>
+      <input type="number" id="capacity">
+    </div>
+    <button onclick="solveKnapsack()">Solve</button>
+    <div id="result"></div>
+  </div>
+  <div id="knapsack" class="vis">
+	<h2>Visualization</h2>
+    <canvas id="canvas1" width="200" height="200"></canvas>
+  </div>
+</div>
+
+<script>
+function solveKnapsack() {
+  const numItems = parseInt(document.getElementById('numItems').value);
+  const capacity = parseInt(document.getElementById('capacity').value);
+
+  let weights = [];
+  let values = [];
+
+  for (let i = 0; i < numItems; i++) {
+    weights.push(parseInt(prompt("Enter weight for item " + (i + 1))));
+    values.push(parseInt(prompt("Enter value for item " + (i + 1))));
+  }
+
+  const dp = new Array(numItems + 1).fill(null).map(() => new Array(capacity + 1).fill(0));
+
+  for (let i = 1; i <= numItems; i++) {
+    for (let w = 1; w <= capacity; w++) {
+      if (weights[i - 1] <= w) {
+        dp[i][w] = Math.max(values[i - 1] + dp[i - 1][w - weights[i - 1]], dp[i - 1][w]);
+      } else {
+        dp[i][w] = dp[i - 1][w];
+      }
+    }
+  }
+
+  let res = dp[numItems][capacity];
+  let w = capacity;
+  let items = [];
+
+  for (let i = numItems; i > 0 && res > 0; i--) {
+    if (res !== dp[i - 1][w]) {
+      items.push(i);
+      res -= values[i - 1];
+      w -= weights[i - 1];
+    }
+  }
+
+  displayResult(items.reverse(), dp[numItems][capacity], weights, values);
+}
+
+function displayResult(items, totalValue, weights, values) {
+  const resultDiv = document.getElementById('result');
+  resultDiv.innerHTML = '';
+  const resultText = document.createElement('p');
+  resultText.textContent = 'Selected Items: ' + items.join(', ');
+
+  resultDiv.appendChild(resultText);
+  
+  // Displaying weights and values of selected items
+  const itemsInfo = document.createElement('p');
+  let itemsInfoText = '';
+  items.forEach(item => {
+    itemsInfoText += `Weight: ${weights[item - 1]}, Value: ${values[item - 1]}<br>`;
+  });
+  itemsInfo.innerHTML = itemsInfoText;
+  resultDiv.appendChild(itemsInfo);
+
+  const valueText = document.createElement('p');
+  valueText.textContent = 'Total Value: ' + totalValue;
+  resultDiv.appendChild(valueText);
+  displayVis(items, weights);
+}
+
+function displayVis(items, weights) {
+  const canvas = document.getElementById('canvas1');
+  const ctx = canvas.getContext('2d');
+  const itemWidth = 20; // Width of each item rectangle
+  const gap = 10; // Gap between rectangles
+  let xPos = 10; // Initial x position
+
+  // Clear previous drawings
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Draw rectangles for each selected item
+  items.forEach((item, index) => {
+    const itemHeight = (weights[item - 1] * 10)+100; // Height based on weight (scaling for visualization)
+    const yPos = canvas.height - itemHeight - 10; // Place rectangles from bottom
+
+    ctx.font = "bold 14px Arial";
+    // Set color for the rectangle
+    ctx.fillStyle = `rgb(${Math.random() * 255},${Math.random() * 255},${Math.random() * 255})`;
+    
+    // Draw the rectangle
+    ctx.fillRect(xPos, yPos, itemWidth+100, itemHeight+200);
+
+    // Draw text inside the rectangle
+    ctx.fillStyle = '#000';
+    ctx.fillText(`W: ${weights[item - 1]}`, xPos + 2, yPos + itemHeight - 5);
+
+    // Update x position for the next rectangle
+    xPos += itemWidth + gap+30;
+  });
+}
+</script>
+</body>
+</html>

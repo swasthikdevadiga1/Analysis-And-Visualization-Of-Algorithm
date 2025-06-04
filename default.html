@@ -1,0 +1,239 @@
+﻿<!DOCTYPE html>
+<html>
+<head>  
+    <meta charset="UTF-8">  
+    <title>Tower of Hanoi</title>  
+<script type="text/javascript" >
+    "use strict";
+    var myTimer = null;
+    var moveInfo;
+    var moveInc = 1;
+    var speed;
+
+    var callStack;
+
+    var barsInfo = [{}, {}, {}, {}, {}];
+
+    var diskPosTop, diskPosLeft, DiskID;
+
+    window.onload = function ()
+    {   diskPosTop = new Array();
+        diskPosLeft = new Array();
+        DiskID = [disk0, disk1, disk2, disk3, disk4]
+        for (var i = 0; i < 5; i++)
+        {  diskPosTop[i] = DiskID[i].style.top; 
+           diskPosLeft[i] = DiskID[i].style.left; } 
+
+    } 
+
+    function executeHanoi()
+     {
+        var speed = parseInt(speedSelectList.options[speedSelectList.selectedIndex].value);
+        var  diskCount = parseInt(diskSelectList.options[diskSelectList.selectedIndex].value);
+
+        // Move Disks to start column  
+        for (var i = 0; i < 5; i++)
+        {  DiskID[i].style.top = diskPosTop[i];
+           DiskID[i].style.left= diskPosLeft[i];
+        } 
+  
+        barsInfo[0].disks = ['disk0', 'disk1', 'disk2', 'disk3', 'disk4'];
+        barsInfo[1].disks = [];
+        barsInfo[2].disks = [];
+        barsInfo[3].disks = [];
+        barsInfo[4].disks = [];
+
+        switch (diskCount) {
+            case 3: barsInfo[0].disks.pop(); barsInfo[0].disks.pop();
+                disk3.style.display = "none"; disk4.style.display = "none"; break;
+
+            case 4: barsInfo[0].disks.pop();
+                disk4.style.display = "none"; break;
+        }
+
+        callStack = [];  // callStack array is global
+
+        Hanoi(diskCount, 0, 2, 1);
+
+        moveDisk(); // moveDisk takes its parameters from callStack
+    }
+
+
+    function Hanoi(n, from, to, via) {
+        if (n == 0) return;
+
+        Hanoi(n - 1, from, via, to);
+
+        callStack.push([from, to]); // save parameters to callStack array
+        Hanoi(n - 1, via, to, from);
+
+    }
+
+    var steps = []; // Array to store steps of disk movements
+
+    function moveDisk() {
+        if (callStack.length == 0) {
+            displaySteps();
+            return;
+        }
+
+        var param = callStack.shift();
+        var fromBar = param[0];
+        var toBar = param[1];
+        
+        // Store the step
+        steps.push("Move disk from Bar " + (fromBar+1) + " to Bar " + (toBar+1));
+
+        var elem = document.getElementById(barsInfo[fromBar].disks.pop());  
+        moveInfo = { elem: elem, fromBar: fromBar, toBar: toBar, whichPos: "top", dir: -1, state: "up", endPos: 60 };
+        myTimer = setInterval(animateMove, speed);
+    }
+
+    function animateMove() {
+        var elem = moveInfo.elem;
+        var dir = moveInfo.dir;
+
+        var pos = parseInt(elem[(moveInfo.whichPos == "left") ? "offsetLeft" : "offsetTop"]);
+
+        if (((dir == 1) && (pos >= moveInfo.endPos)) || ((dir == -1) && (pos <= moveInfo.endPos))) {
+            if (moveInfo.state == "up") {
+                moveInfo.state = "hor";
+                moveInfo.whichPos = "left";
+                moveInfo.dir = 1;
+                if (moveInfo.fromBar > moveInfo.toBar) moveInfo.dir = -1;
+                var toBar = document.getElementById("bar" + moveInfo.toBar);
+                moveInfo.endPos = toBar.offsetLeft - Math.floor(elem.offsetWidth / 2) + 15;
+                return;
+            }
+            else if (moveInfo.state == "hor") {
+                moveInfo.state = "down";
+                moveInfo.whichPos = "top";
+                moveInfo.dir = 1;
+                moveInfo.endPos = document.getElementById("bottombar").offsetTop - (barsInfo[moveInfo.toBar].disks.length + 1) * elem.offsetHeight;
+                return;
+            }
+            else {
+                clearInterval(myTimer);
+                barsInfo[moveInfo.toBar].disks.push(elem.id);
+                moveDisk();
+                return;
+            }
+        }
+
+        pos = pos + dir * moveInc;
+        elem.style[moveInfo.whichPos] = pos + "px";
+
+        if (moveInfo.state == "up") {
+            var fromBar = document.getElementById("bar" + moveInfo.fromBar);
+            if (elem.offsetTop < fromBar.offsetTop) {
+                var x = elem.getElementsByClassName("insideImg")[0].offsetHeight;
+                if (x > 0) elem.getElementsByClassName("insideImg")[0].style.height = x - moveInc + "px";
+            }
+        }
+
+        if (moveInfo.state == "down") {
+            var toBar = document.getElementById("bar" + moveInfo.toBar);
+            if (elem.offsetTop > toBar.offsetTop) {
+                var x = elem.getElementsByClassName("insideImg")[0].offsetHeight;
+                if (x < 14) elem.getElementsByClassName("insideImg")[0].style.height = x + moveInc + "px";
+            }
+        }
+
+    }
+
+    function displaySteps() {
+        var stepsContainer = document.getElementById("stepsContainer");
+        stepsContainer.innerHTML = "<h3>Steps:</h3>";
+        steps.forEach(function(step) {
+            stepsContainer.innerHTML += "<p>" + step + "</p>";
+        });
+    }
+
+</script>
+
+<style> 
+#stepsContainer {
+    margin-top: 400px;
+    margin-left: 100px;
+    background-color: lightgrey;
+    color: black; /* Change font color to red */
+    font-size: 18px; /* Change font size to 18px */
+    padding: 20px; /* Add padding for better readability */
+    border-radius: 8px; /* Add border radius for rounded corners */
+}
+
+#stepsContainer p {
+    margin: 10px 0; /* Add some margin between paragraphs */
+    font-family: Arial, sans-serif; /* Change font family */
+}
+
+ #container { position:absolute; top:30px; left:20px; border:1px solid black; height:350px; width:760px; }
+
+ #bar0 { position:absolute; top:100px; left:130px; height:200px; width:30px; }
+
+ #bar1 { position:absolute; top:100px; left:360px; height:200px; width:30px; }
+
+ #bar2 { position:absolute; top:100px; left:600px; height:200px; width:30px; }
+
+ .disk { padding:0; margin:0; position:absolute; border:1px solid gray; height:26px; 
+         -moz-box-sizing:border-box; box-sizing:border-box; border-radius:4px;}
+
+ /* left of disk0 at 35px; left = 130 (bar0 left) -w/2 + 15 (bar width/2)  */
+ #disk0  { top:274px; left:35px;background:#DDEEFE; width:220px;  } 
+ #disk1 { top:248px; left:55px;background:#CEEDDF; width:180px; }
+ #disk2 { top:222px; left:75px;background:#FEEEEF; width:140px; }  
+ #disk3 { top:196px; left:95px;background:#EEFEFF; width:100px; }
+ #disk4 { top:170px; left:115px;background:#EEFECC; width:60px;  }
+
+ #bottombar { position:absolute; top:300px; left:10px;background:#222; border:1px solid black; height:30px; width:740px; }
+  
+ label { float:right; width:100px; margin-top:8px;}
+
+ button { float:right; margin-top:26px; margin-right:16px; padding:2px 8px; height:28px;}
+
+ img { height:200px; width:30px; padding:0; margin:0; } /* for towers (bars) */
+ 
+.insideImg { z-index:100; position:absolute; border:0;top:-1px; height:14px; width:30px; }
+</style>  
+  
+</head>
+<body>
+
+<div id="container">
+
+
+<div id="bar0"><img src="Bar.png" /></div>
+
+<div id="bar1"><img src="Bar.png" /></div>
+
+<div id="bar2"><img src="Bar.png" /></div>
+<div id="bottombar"></div>
+
+<div class="disk" id="disk0" ><img class="insideImg"  style="left:94px;"  src="Bar2.png" /></div> 
+<div class="disk" id="disk1" ><img class="insideImg"  style="left:74px;"  src="Bar2.png" /></div> 
+<div class="disk" id="disk2" ><img class="insideImg"  style="left:54px;"  src="Bar2.png" /></div> 
+<div class="disk" id="disk3" ><img class="insideImg"  style="left:34px;"  src="Bar2.png" /></div> 
+<div class="disk" id="disk4" ><img class="insideImg"  style="left:14px;"  src="Bar2.png" /></div> 
+
+<button onclick="executeHanoi()" >Start</button>
+ 
+<label>Speed <select id="speedSelectList" >
+<option  value="1" >fast</option>
+<option  value="10" >medium</option>
+<option  value="20" >slow</option>
+</select>
+</label>
+
+<label>No. of Disks<select id="diskSelectList" >
+<option  value="5" >5 disks</option>
+<option  value="4" >4 disks</option>
+<option  value="3" >3 disks</option>
+</select>
+</label>
+
+<div id="stepsContainer"></div> <!-- Container to display steps -->
+
+</div> 
+ 
+</body>
+</html>

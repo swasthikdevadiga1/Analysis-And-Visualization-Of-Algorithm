@@ -1,0 +1,100 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(to right, #2980b9, #6dd5fa, #ffffff);
+    background-size: 600% 100%;
+    animation: gradient 10s linear infinite;
+    color: #333;
+}
+
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333;
+    font-weight: 700;
+    text-align: center;
+}
+
+input[type="number"] {
+    width: 100px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-right: 10px;
+}
+
+button {
+    padding: 8px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 20px;
+    display: block;
+    margin: 20px auto;
+}
+
+button:hover {
+    background-color: green;
+}
+
+#edgeMatrix {
+    margin-top: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+}
+
+#shortestPaths {
+    margin-top: 20px;
+}
+
+#graph {
+    margin-top: 40px;
+    text-align: center;
+}
+
+.link {
+    stroke: #666;
+    stroke-width: 2px;
+    opacity: 0.6;
+}
+
+.node circle {
+    fill: #007bff;
+    stroke: #fff;
+    stroke-width: 3px;
+}
+
+.node text {
+    fill: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    pointer-events: none; /* Prevent text selection */
+}
